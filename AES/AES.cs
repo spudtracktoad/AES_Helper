@@ -22,16 +22,39 @@ namespace AESEncryption
         #endregion
 
         #region KeyExpansion
-        public void subBytes()
+
+        public uint subWord(uint word)
         {
+            uint result;
+            byte[] tmpBytes = BitConverter.GetBytes(word);
+
             for (int i = 0; i < 4; i++)
             {
-                for (int d = 0; d < 4; d++)
-                {
-                    state[i, d] = Constants.Sbox[(state[i, d] & 0xf0) >> 4, (state[i, d] & 0x0f)];
-                }
+                tmpBytes[i] = subByte(tmpBytes[i]);
             }
+
+            result = BitConverter.ToUInt32(tmpBytes, 0);
+
+            return result;
         }
+
+        public uint rotWord(uint word)
+        {
+            uint result;
+            byte[] tmpBytes = BitConverter.GetBytes(word);
+            byte tmpByte;
+
+            tmpByte = tmpBytes[3];
+            tmpBytes[3] = tmpBytes[2];
+            tmpBytes[2] = tmpBytes[1];
+            tmpBytes[1] = tmpBytes[0];
+            tmpBytes[0] = tmpByte;
+
+            result = BitConverter.ToUInt32(tmpBytes, 0);
+            return result;
+        }
+
+
         #endregion
 
         #region Finite Field 
@@ -75,6 +98,17 @@ namespace AESEncryption
 
         #region Cipher
 
+        public void subBytes()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    state[i, d] = subByte(state[i, d]);
+                }
+            }
+        }
+
         public void mixColumns()
         {
             var tmpState = new byte[4, 4];
@@ -88,6 +122,13 @@ namespace AESEncryption
             State = tmpState;
         }
 
+        public void shiftRows()
+        {
+            for (int row = 1; row < 4; row++)
+            {
+                shiftRow( row);
+            }
+        }
         #endregion
 
         #region Helper Private
@@ -106,6 +147,31 @@ namespace AESEncryption
             }
             //result = BitConverter.GetBytes(xTime(0xd4) ^ (xTime(0xbf) ^ 0xbf) ^ 0x5d ^ 0x30);
             return result[0];
+        }
+
+        private byte subByte(byte a)
+        {
+            return Constants.Sbox[(a & 0xf0) >> 4, (a & 0x0f)];
+        }
+
+        private void shiftRow(int shiftNumber)
+        {
+            byte[] result = new byte[4];
+            byte tmp;
+
+            for (int index = 0; index < 4; index++)
+            {
+                result[index] = state[shiftNumber, index];
+            }
+
+            for (int index = 0; index < shiftNumber; index++)
+            {
+                tmp = state[shiftNumber, 0];
+                state[shiftNumber, 0] = state[shiftNumber, 1];
+                state[shiftNumber, 1] = state[shiftNumber, 2];
+                state[shiftNumber, 2] = state[shiftNumber, 3];
+                state[shiftNumber, 3] = tmp;
+            }
         }
         #endregion
     }

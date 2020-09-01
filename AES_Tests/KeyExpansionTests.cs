@@ -28,22 +28,53 @@ namespace AES_Tests
 
             aesTest.state = TestState;
         }
+
         [TestMethod]
-        public void subWordTest()
+        public void subWordTestZero()
         {
-            aesTest.state = TestState;
+            var result = aesTest.subWord(0x00102030);
 
-            aesTest.subBytes();
+            Assert.IsTrue(result == 0x63cab704);
+        }
 
-            var result = aesTest.state;
+        [TestMethod]
+        public void subWordTestOne()
+        {
+            var result = aesTest.subWord(0x40506070);
 
-            for (int i = 0; i < 4; i++)
-            {
-                for (int d = 0; d < 4; d++)
-                {
-                    Assert.IsTrue(result[i, d] == TestStateResult[i, d]);
-                }
-            }
+            Assert.IsTrue(result == 0x0953d051);
+        }
+
+        [TestMethod]
+        public void subWordTestTwo()
+        {
+            var result = aesTest.subWord(0x8090a0b0);
+
+            Assert.IsTrue(result == 0xcd60e0e7);
+        }
+
+        [TestMethod]
+        public void subWordTestThree()
+        {
+            var result = aesTest.subWord(0xc0d0e0f0);
+
+            Assert.IsTrue(result == 0xba70e18c);
+        }
+
+        [TestMethod]
+        public void rotWordTestOne()
+        {
+            var result = aesTest.rotWord(0x09cf4f3c);
+
+            Assert.IsTrue(result == 0xcf4f3c09);
+        }
+
+        [TestMethod]
+        public void rotWordTestTwo()
+        {
+            var result = aesTest.rotWord(0x2a6c7605);
+
+            Assert.IsTrue(result == 0x6c76052a);
         }
     }
 }
