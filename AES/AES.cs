@@ -15,28 +15,57 @@ namespace AESEncryption
         private byte[,] Key = new byte[4,4];
         private byte[,] KeySchedule = new byte[44,4];
 
+        private int rCount { get; set; } = 0;
         public int round { get; set; } = 0;
         public int Nr { get; set; } = 10;
         public int Nb { get; set; } = 4;
         public int Nk { get; set; } = 4;
-
         public byte[,] keySchedule { get { return KeySchedule; } }
 
         public byte[,] Encrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode mode)
         {
+            Console.WriteLine("CIPHER (ENCRYPT):");
+            aesSetup(mode);
+
             for (int i = 0; i < 4; i++)
             {
                 for (int d = 0; d < 4; d++)
                 {
-                    state[d, i] = input[4*i + d];
-                    Key[d, i] = cipher_Key[4 * i + d];
+                    state[i, d] = input[4*i + d];
+                    Key[i, d] = cipher_Key[4 * i + d];
                 }
             }
 
+            printArray(state, "input");
+
             expandKey();
-
+            printKeySchedule();
             addRoundKey();
+            round++;
 
+            //1 - Nr - 1 rounds
+            for (; round < Nr; round++)
+            {
+                printArray(state, "Start");
+                subBytes();
+                printArray(state, "s_box");
+                shiftRows();
+                printArray(state, "s_row");
+                mixColumns();
+                printArray(state, "m_col");
+                addRoundKey();
+                printKeySchedule();
+            }
+
+            //Last round
+            printArray(state, "Start");
+            subBytes();
+            printArray(state, "s_box");
+            shiftRows();
+            printArray(state, "s_row");
+            addRoundKey(); 
+            printKeySchedule();
+            printArray(state, "output");
 
             return state;
         }
@@ -52,6 +81,34 @@ namespace AESEncryption
         {
             get { return State; }
             set { State = value; }
+        }
+
+        public byte[,] Encrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode mode, int rounds)
+        {
+            aesSetup(mode);
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    state[i, d] = input[4 * i + d];
+                    Key[i, d] = cipher_Key[4 * i + d];
+                }
+            }
+
+            expandKey();
+            addRoundKey();
+            rCount = 4;
+
+            for (int round = 0; round < rounds-1; round++)
+            {
+                subBytes();
+                shiftRows();
+                mixColumns();
+                addRoundKey();
+            }
+
+            return state;
         }
         #endregion
 
@@ -79,17 +136,6 @@ namespace AESEncryption
 
             return tmpBytes;
         }
-
-        //public uint rotWord(uint word)
-        //{
-        //    uint result;
-
-        //    var tmpWord = BitConverter.GetBytes(word);
-
-        //    result = BitConverter.ToUInt32(rotWord(tmpWord), 0);
-
-        //    return result;
-        //}
 
         public byte[] rotWord(byte[] word)
         {
@@ -139,7 +185,6 @@ namespace AESEncryption
                         for (int i = 0; i < 4; i++)
                         {
                             temp[i] = BitConverter.GetBytes(temp[i] ^ tmp[3-i])[0];
-                            temp[i] = BitConverter.GetBytes(temp[i] ^ keySchedule[index-4,i])[0];
                         }
                     }
                     else if (Nk > 6 && index % Nk == 4)
@@ -211,13 +256,15 @@ namespace AESEncryption
         public void mixColumns()
         {
             var tmpState = new byte[4, 4];
-            for (int Col = 0; Col < 4; Col++)
+
+            for (int row = 0; row < 4; row++)
             {
-                for (int row = 0; row < 4; row++)
-                {
-                    tmpState[row, Col] = CalcMixColumn(row, Col);
-                }
+                tmpState[row, 0] = BitConverter.GetBytes(xTime(State[row, 0]) ^ (xTime(State[row, 1]) ^ State[row, 1]) ^ State[row, 2] ^ State[row, 3])[0];
+                tmpState[row, 1] = BitConverter.GetBytes(xTime(State[row, 1]) ^ (xTime(State[row, 2]) ^ State[row, 2]) ^ State[row, 3] ^ State[row, 0])[0];
+                tmpState[row, 2] = BitConverter.GetBytes(xTime(State[row, 2]) ^ (xTime(State[row, 3]) ^ State[row, 3]) ^ State[row, 0] ^ State[row, 1])[0];
+                tmpState[row, 3] = BitConverter.GetBytes(xTime(State[row, 3]) ^ (xTime(State[row, 0]) ^ State[row, 0]) ^ State[row, 1] ^ State[row, 2])[0];
             }
+
             State = tmpState;
         }
 
@@ -231,14 +278,39 @@ namespace AESEncryption
 
         public void addRoundKey()
         {
-            for (int i = round; i < round+4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 addRoundKeyBytes(i);
+                rCount++;
             }
         }
         #endregion
 
         #region Helper Private
+
+        private void aesSetup(Constants.EncryptionMode mode)
+        {
+            switch (mode)
+            {
+                case Constants.EncryptionMode.AES128:
+                    Nb = 4;
+                    Nk = 4;
+                    Nr = 10;
+                    break;
+                case Constants.EncryptionMode.AES192:
+                    Nb = 4;
+                    Nk = 6;
+                    Nr = 12;
+                    break;
+                case Constants.EncryptionMode.AES256:
+                    Nb = 4;
+                    Nk = 8;
+                    Nr = 14;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         private uint getKey(int index)
         {
@@ -251,23 +323,6 @@ namespace AESEncryption
             return BitConverter.ToUInt32(tmp, 0);
         }
 
-        private byte CalcMixColumn(int row, int col)
-        {
-            byte[] result= new byte[4];
-
-            for (int index = 0; index < 4; index++)
-            {
-                if (Constants.ColmnsMixArray[row, index] == 0x1)
-                    result = BitConverter.GetBytes(result[0] ^ State[index, col]);
-                if (Constants.ColmnsMixArray[row, index] == 0x2)
-                    result = BitConverter.GetBytes(xTime(State[index, col]) ^ result[0]);
-                if (Constants.ColmnsMixArray[row, index] == 0x3)
-                    result = BitConverter.GetBytes((xTime(State[index, col]) ^ State[index, col]) ^ result[0]);
-            }
-            //result = BitConverter.GetBytes(xTime(0xd4) ^ (xTime(0xbf) ^ 0xbf) ^ 0x5d ^ 0x30);
-            return result[0];
-        }
-
         private byte subByte(byte a)
         {
             return Constants.Sbox[(a & 0xf0) >> 4, (a & 0x0f)];
@@ -275,36 +330,56 @@ namespace AESEncryption
 
         private void shiftRow(int shiftNumber)
         {
-            byte[] result = new byte[4];
             byte tmp;
-
-            for (int index = 0; index < 4; index++)
-            {
-                result[index] = state[shiftNumber, index];
-            }
 
             for (int index = 0; index < shiftNumber; index++)
             {
-                tmp = state[shiftNumber, 0];
-                state[shiftNumber, 0] = state[shiftNumber, 1];
-                state[shiftNumber, 1] = state[shiftNumber, 2];
-                state[shiftNumber, 2] = state[shiftNumber, 3];
-                state[shiftNumber, 3] = tmp;
+                tmp = state[0, shiftNumber];
+                state[0, shiftNumber] = state[1, shiftNumber];
+                state[1, shiftNumber] = state[2, shiftNumber];
+                state[2, shiftNumber] = state[3, shiftNumber];
+                state[3, shiftNumber] = tmp;
             }
         }
 
         private void addRoundKeyBytes(int col)
         {
             byte[] tmpKey = new byte[4];
-            tmpKey[0] = KeySchedule[0, col];
-            tmpKey[1] = KeySchedule[1, col];
-            tmpKey[2] = KeySchedule[2, col];
-            tmpKey[3] = KeySchedule[3, col];
+            tmpKey[0] = KeySchedule[rCount, 0];
+            tmpKey[1] = KeySchedule[rCount, 1];
+            tmpKey[2] = KeySchedule[rCount, 2];
+            tmpKey[3] = KeySchedule[rCount, 3];
 
             for (int i = 0; i < 4; i++)
             {
-                state[i, col%4] = BitConverter.GetBytes(state[i, col%4] ^ tmpKey[i])[0];
+                state[col, i] = BitConverter.GetBytes(state[col, i] ^ tmpKey[i])[0];
             }
+        }
+
+        private void printArray(byte[,] data, string state)
+        {
+            Console.Write("round[{0}].{1}         ", round, state);
+            for (int i = 0; i < 4; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    Console.Write("{0:X}", data[i, d]);
+                }
+            }
+            Console.WriteLine();
+        }
+
+        private void printKeySchedule()
+        {
+            Console.Write("round[{0}].{1}         ", round, "k_sch");
+            for (int i = round*4; i < round*4+4; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    Console.Write("{0:X}", KeySchedule[i, d]);
+                }
+            }
+            Console.WriteLine();
         }
         #endregion
     }
