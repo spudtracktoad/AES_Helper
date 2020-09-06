@@ -127,10 +127,10 @@ namespace AESEncryption
                 else
                 {
                     byte[] temp = new byte[4];
-                    temp[0] = keySchedule[0, index - 1];
-                    temp[1] = keySchedule[1, index - 1];
-                    temp[2] = keySchedule[2, index - 1];
-                    temp[3] = keySchedule[3, index - 1];
+                    temp[0] = keySchedule[index-1, 0];
+                    temp[1] = keySchedule[index - 1, 1];
+                    temp[2] = keySchedule[index - 1, 2];
+                    temp[3] = keySchedule[index - 1, 3];
 
                     if ((index % Nk) == 0)
                     {
@@ -243,10 +243,10 @@ namespace AESEncryption
         private uint getKey(int index)
         {
             byte[] tmp = new byte[4];
-            tmp[3] = key[0, index];
-            tmp[2] = key[1, index];
-            tmp[1] = key[2, index];
-            tmp[0] = key[3, index];
+            tmp[3] = key[index, 0];
+            tmp[2] = key[index, 1];
+            tmp[1] = key[index, 2];
+            tmp[0] = key[index, 3];
 
             return BitConverter.ToUInt32(tmp, 0);
         }
