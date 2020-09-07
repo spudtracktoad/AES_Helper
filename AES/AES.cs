@@ -13,11 +13,11 @@ namespace AESEncryption
     {
         private byte[,] State;
         private byte[,] Key;
-        private byte[,] KeySchedule;
+        private byte[,] KeySchedule;   
+        private int rCount { get; set; } 
+        public int round { get; set; }
         private Constants.EncryptionMode Mode;
 
-        private int rCount { get; set; }
-        public int round { get; set; }
         public int Nr { get; set; }
         public int Nb { get; set; }
         public int Nk { get; set; }
@@ -52,6 +52,7 @@ namespace AESEncryption
 
         public byte[,] Encrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode mode)
         {
+            Console.WriteLine();
             Console.WriteLine("CIPHER (ENCRYPT):");
             Mode = mode;
 
@@ -59,8 +60,9 @@ namespace AESEncryption
             {
                 for (int d = 0; d < 4; d++)
                 {
-                    state[i, d] = input[Nk*i + d];
-                    Key[i, d] = cipher_Key[Nk * i + d];
+                    if(i < 4)
+                        state[i, d] = input[Nb*i + d];
+                    Key[i, d] = cipher_Key[Nb * i + d];
                 }
             }
 
@@ -326,8 +328,10 @@ namespace AESEncryption
                 default:
                     break;
             }
+            rCount = 0;
+            round = 0;
             State = new byte[Nb, 4];
-            Key = new byte[Nb, 4];
+            Key = new byte[Nk, 4];
             KeySchedule = new byte[(Nb*(Nr+1)), 4];
         }
 
@@ -382,7 +386,7 @@ namespace AESEncryption
             {
                 for (int d = 0; d < 4; d++)
                 {
-                    Console.Write("{0:X}", data[i, d]);
+                    Console.Write("{0}", data[i, d].ToString("X2"));
                 }
             }
             Console.WriteLine();
@@ -395,7 +399,7 @@ namespace AESEncryption
             {
                 for (int d = 0; d < 4; d++)
                 {
-                    Console.Write("{0:X}", KeySchedule[i, d]);
+                    Console.Write("{0}", KeySchedule[i, d].ToString("X2"));
                 }
             }
             Console.WriteLine();
