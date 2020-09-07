@@ -20,20 +20,18 @@ namespace AES_Tests
         public void setup()
         {
             aesTest = new AES(Constants.EncryptionMode.AES192);
+            byte[,] testKey = new byte[,] { { 0x8e, 0x73, 0xb0, 0xf7 },
+                                            { 0xda, 0x0e, 0x64, 0x52 },
+                                            { 0xc8, 0x10, 0xf3, 0x2b },
+                                            { 0x80, 0x90, 0x79, 0xe5 },
+                                            { 0x62, 0xf8, 0xea, 0xd2 },
+                                            { 0x52, 0x2c, 0x6b, 0x7b } };
+            aesTest.key = testKey;
         }
 
         [TestMethod]
         public void ExpandKeyInitial()
         {
-            byte[,] testKey = new byte[,] { { 0x8e, 0x73, 0xb0, 0xf7 }, 
-                                            { 0xda, 0x0e, 0x64, 0x52 }, 
-                                            { 0xc8, 0x10, 0xf3, 0x2b },
-                                            { 0x80, 0x90, 0x79, 0xe5 },
-                                            { 0x62, 0xf8, 0xea, 0xd2 },
-                                            { 0x52, 0x2c, 0x6b, 0x7b } };
-
-            aesTest.key = testKey;
-
             aesTest.expandKey();
 
             var resultKey = aesTest.keySchedule;
@@ -47,15 +45,6 @@ namespace AES_Tests
         [TestMethod]
         public void ExpandKeyRnd6()
         {
-            byte[,] testKey = new byte[,] { { 0x8e, 0x73, 0xb0, 0xf7 },
-                                            { 0xda, 0x0e, 0x64, 0x52 },
-                                            { 0xc8, 0x10, 0xf3, 0x2b },
-                                            { 0x80, 0x90, 0x79, 0xe5 },
-                                            { 0x62, 0xf8, 0xea, 0xd2 },
-                                            { 0x52, 0x2c, 0x6b, 0x7b } };
-
-            aesTest.key = testKey;
-
             aesTest.expandKey();
 
             var resultKey = aesTest.keySchedule;
@@ -69,15 +58,6 @@ namespace AES_Tests
         [TestMethod]
         public void ExpandKeyComplete()
         {
-            byte[,] testKey = new byte[,] { { 0x8e, 0x73, 0xb0, 0xf7 },
-                                            { 0xda, 0x0e, 0x64, 0x52 },
-                                            { 0xc8, 0x10, 0xf3, 0x2b },
-                                            { 0x80, 0x90, 0x79, 0xe5 },
-                                            { 0x62, 0xf8, 0xea, 0xd2 },
-                                            { 0x52, 0x2c, 0x6b, 0x7b } };
-
-            aesTest.key = testKey;
-
             aesTest.expandKey();
 
             var resultKey = aesTest.keySchedule;
