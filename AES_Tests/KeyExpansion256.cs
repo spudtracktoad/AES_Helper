@@ -41,10 +41,10 @@ namespace AES_Tests
 
             var resultKey = aesTest.keySchedule;
 
-            Assert.IsTrue(resultKey[0, 0] == 0x8e);
-            Assert.IsTrue(resultKey[0, 1] == 0x73);
-            Assert.IsTrue(resultKey[0, 2] == 0xb0);
-            Assert.IsTrue(resultKey[0, 3] == 0xf7);
+            Assert.IsTrue(resultKey[0, 0] == 0x60);
+            Assert.IsTrue(resultKey[0, 1] == 0x3d);
+            Assert.IsTrue(resultKey[0, 2] == 0xeb);
+            Assert.IsTrue(resultKey[0, 3] == 0x10);
         }
 
         [TestMethod]
@@ -54,10 +54,10 @@ namespace AES_Tests
 
             var resultKey = aesTest.keySchedule;
 
-            Assert.IsTrue(resultKey[6, 0] == 0xfe);
-            Assert.IsTrue(resultKey[6, 1] == 0x0c);
-            Assert.IsTrue(resultKey[6, 2] == 0x91);
-            Assert.IsTrue(resultKey[6, 3] == 0xf7);
+            Assert.IsTrue(resultKey[8, 0] == 0x9b);
+            Assert.IsTrue(resultKey[8, 1] == 0xa3);
+            Assert.IsTrue(resultKey[8, 2] == 0x54);
+            Assert.IsTrue(resultKey[8, 3] == 0x11);
         }
 
         [TestMethod]

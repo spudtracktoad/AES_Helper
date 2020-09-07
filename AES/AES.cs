@@ -14,6 +14,7 @@ namespace AESEncryption
         private byte[,] State;
         private byte[,] Key;
         private byte[,] KeySchedule;
+        private Constants.EncryptionMode Mode;
 
         private int rCount { get; set; }
         public int round { get; set; }
@@ -21,17 +22,28 @@ namespace AESEncryption
         public int Nb { get; set; }
         public int Nk { get; set; }
         public byte[,] keySchedule { get { return KeySchedule; } }
+
         public byte[,] key
         {
             get { return Key; }
             set { Key = value; }
         }
+
         public byte[,] state
         {
             get { return State; }
             set { State = value; }
         }
 
+        public Constants.EncryptionMode mode 
+        {
+            get { return Mode; }
+            set
+            {
+                Mode = value;
+                aesSetup(mode);
+            }
+        }
 
         public AES(Constants.EncryptionMode mode)
         {
@@ -41,14 +53,14 @@ namespace AESEncryption
         public byte[,] Encrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode mode)
         {
             Console.WriteLine("CIPHER (ENCRYPT):");
-            aesSetup(mode);
+            Mode = mode;
 
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < Nk; i++)
             {
                 for (int d = 0; d < 4; d++)
                 {
-                    state[i, d] = input[4*i + d];
-                    Key[i, d] = cipher_Key[4 * i + d];
+                    state[i, d] = input[Nk*i + d];
+                    Key[i, d] = cipher_Key[Nk * i + d];
                 }
             }
 

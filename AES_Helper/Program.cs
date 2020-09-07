@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,24 +20,47 @@ namespace AES_Helper
 
             byte[] Cipher_Key128Bit = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
+            byte[] PLAINTEXT192Bit = new byte[] { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff };
+            byte[] KEY192Bit = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17 };
+
+            //Console.WriteLine("128 Bit");
+            //Console.Write("Plantest:            ");
+            //for (int i = 0; i < Input128Bit.Length; i++)
+            //{
+            //    Console.Write("{0:X}", Input128Bit[i]);
+            //}
+            //Console.WriteLine();
+            //Console.Write("Key:                 ");
+            //for (int i = 0; i < Cipher_Key128Bit.Length; i++)
+            //{
+            //    Console.Write("{0:X}", Cipher_Key128Bit[i]);
+            //}
+            //Console.WriteLine();
+            //Console.WriteLine();
+            //Console.WriteLine();
+
+            //var cipher = aesCipher.Encrypt(Input128Bit, Cipher_Key128Bit, Constants.EncryptionMode.AES128);
+
+            aesCipher.mode = Constants.EncryptionMode.AES192;
+
+            Console.WriteLine("128 Bit");
             Console.Write("Plantest:            ");
-            for (int i = 0; i < Input128Bit.Length; i++)
+            for (int i = 0; i < PLAINTEXT192Bit.Length; i++)
             {
-                Console.Write("{0:X}", Input128Bit[i]);
+                Console.Write("{0:X}", PLAINTEXT192Bit[i]);
             }
             Console.WriteLine();
             Console.Write("Key:                 ");
-            for (int i = 0; i < Cipher_Key128Bit.Length; i++)
+            for (int i = 0; i < KEY192Bit.Length; i++)
             {
-                Console.Write("{0:X}", Cipher_Key128Bit[i]);
+                Console.Write("{0:X}", KEY192Bit[i]);
             }
+
+            var cipher192 = aesCipher.Encrypt(PLAINTEXT192Bit, KEY192Bit, Constants.EncryptionMode.AES192);
+
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine();
-
-            var cipher = aesCipher.Encrypt(Input128Bit, Cipher_Key128Bit, Constants.EncryptionMode.AES128);
-
-
             Console.ReadLine();
         }
     }
