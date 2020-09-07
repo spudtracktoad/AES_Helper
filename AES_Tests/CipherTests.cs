@@ -79,6 +79,34 @@ namespace AES_Tests
         }
 
         [TestMethod]
+        public void invSubWordTest()
+        {
+
+            TestState = new byte[,] {{ 0x19, 0xa0, 0x9a, 0xe9 },
+                                         { 0x3d, 0xf4, 0xc6, 0xf8 },
+                                         { 0xe3, 0xe2, 0x8d, 0x48 },
+                                         { 0xbe, 0x2b, 0x2a, 0x08 } };
+
+            TestStateResult = new byte[,] {{ 0x8e, 0x47, 0x37, 0xeb },
+                                               { 0x8b, 0xba, 0xc7, 0xe1 },
+                                               { 0x4d, 0x3b, 0xb4, 0xd4 },
+                                               { 0x5a, 0x0b, 0x95, 0xbf } };
+            aesTest.state = TestState;
+
+            aesTest.invSubBytes();
+
+            var result = aesTest.state;
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    Assert.IsTrue(result[i, d] == TestStateResult[i, d]);
+                }
+            }
+        }
+
+        [TestMethod]
         public void shiftRowTest()
         {
 
@@ -94,6 +122,34 @@ namespace AES_Tests
             aesTest.state = TestState;
 
             aesTest.shiftRows();
+
+            var result = aesTest.state;
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    Assert.IsTrue(result[i, j] == TestStateResult[i, j]);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void invShiftRowTest()
+        {
+
+            TestState = new byte[,] {{ 0xd4, 0x27, 0x11, 0xae },
+                                     { 0xe0, 0xbf, 0x98, 0xf1 },
+                                     { 0xb8, 0xb4, 0x5d, 0xe5 },
+                                     { 0x1e, 0x41, 0x52, 0x30 } };
+
+            TestStateResult = new byte[,] {{ 0xd4, 0x41, 0x5d, 0xf1},
+                                           { 0xe0, 0x27, 0x52, 0xe5},
+                                           { 0xb8, 0xbf, 0x11, 0x30},
+                                           { 0x1e, 0xb4, 0x98, 0xae}};
+            aesTest.state = TestState;
+
+            aesTest.invShiftRows();
 
             var result = aesTest.state;
 

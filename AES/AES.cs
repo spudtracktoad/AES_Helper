@@ -50,11 +50,11 @@ namespace AESEncryption
             aesSetup(mode);
         }
 
-        public byte[,] Encrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode mode)
+        public byte[,] Encrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode aesMode)
         {
             Console.WriteLine();
             Console.WriteLine("CIPHER (ENCRYPT):");
-            Mode = mode;
+            mode = aesMode;
 
             for (int i = 0; i < Nk; i++)
             {
@@ -94,6 +94,56 @@ namespace AESEncryption
             shiftRows();
             printArray(state, "s_row");
             addRoundKey(); 
+            printKeySchedule();
+            printArray(state, "output");
+
+            return state;
+        }
+
+        public byte[,] decrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode aesMode)
+        {
+            Console.WriteLine();
+            Console.WriteLine("CIPHER (DECRYPT):");
+            mode = aesMode;
+
+            for (int i = 0; i < Nk; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    if (i < 4)
+                        state[i, d] = input[Nb * i + d];
+                    Key[i, d] = cipher_Key[Nb * i + d];
+                }
+            }
+
+            printArray(state, "input");
+
+            expandKey();
+            printKeySchedule();
+            addRoundKey();
+            round++;
+
+            //1 - Nr - 1 rounds
+            for (; round < Nr; round++)
+            {
+                printArray(state, "Start");
+                invSubBytes();
+                printArray(state, "s_box");
+                invShiftRows();
+                printArray(state, "s_row");
+                invMixColumns();
+                printArray(state, "m_col");
+                addRoundKey();
+                printKeySchedule();
+            }
+
+            //Last round
+            printArray(state, "Start");
+            invSubBytes();
+            printArray(state, "s_box");
+            invShiftRows();
+            printArray(state, "s_row");
+            addRoundKey();
             printKeySchedule();
             printArray(state, "output");
 
@@ -302,6 +352,40 @@ namespace AESEncryption
                 rCount++;
             }
         }
+
+        public void invSubBytes()
+        {
+            for (int i = 0; i < Nb; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    state[i, d] = invSubByte(state[i, d]);
+                }
+            }
+        }
+
+        public void invMixColumns()
+        {
+            var tmpState = new byte[Nb, 4];
+
+            for (int row = 0; row < Nb; row++)
+            {
+                tmpState[row, 0] = BitConverter.GetBytes(xTime(State[row, 0]) ^ (xTime(State[row, 1]) ^ State[row, 1]) ^ State[row, 2] ^ State[row, 3])[0];
+                tmpState[row, 1] = BitConverter.GetBytes(xTime(State[row, 1]) ^ (xTime(State[row, 2]) ^ State[row, 2]) ^ State[row, 3] ^ State[row, 0])[0];
+                tmpState[row, 2] = BitConverter.GetBytes(xTime(State[row, 2]) ^ (xTime(State[row, 3]) ^ State[row, 3]) ^ State[row, 0] ^ State[row, 1])[0];
+                tmpState[row, 3] = BitConverter.GetBytes(xTime(State[row, 3]) ^ (xTime(State[row, 0]) ^ State[row, 0]) ^ State[row, 1] ^ State[row, 2])[0];
+            }
+
+            State = tmpState;
+        }
+
+        public void invShiftRows()
+        {
+            for (int row = 1; row < 4; row++)
+            {
+                invShiftRow(row);
+            }
+        }
         #endregion
 
         #region Helper Private
@@ -351,6 +435,11 @@ namespace AESEncryption
             return Constants.Sbox[(a & 0xf0) >> 4, (a & 0x0f)];
         }
 
+        private byte invSubByte(byte a)
+        {
+            return Constants.InvSbox[(a & 0xf0) >> 4, (a & 0x0f)];
+        }
+
         private void shiftRow(int shiftNumber)
         {
             byte tmp;
@@ -362,6 +451,20 @@ namespace AESEncryption
                 state[1, shiftNumber] = state[2, shiftNumber];
                 state[2, shiftNumber] = state[3, shiftNumber];
                 state[3, shiftNumber] = tmp;
+            }
+        }
+
+        private void invShiftRow(int shiftNumber)
+        {
+            byte tmp;
+
+            for (int index = 0; index < shiftNumber; index++)
+            {
+                tmp = state[3, shiftNumber];
+                state[1, shiftNumber] = state[0, shiftNumber];
+                state[2, shiftNumber] = state[1, shiftNumber];
+                state[3, shiftNumber] = state[2, shiftNumber];
+                state[0, shiftNumber] = tmp;
             }
         }
 
