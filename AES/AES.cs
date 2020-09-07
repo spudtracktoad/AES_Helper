@@ -11,16 +11,32 @@ namespace AESEncryption
 {
     public class AES
     {
-        private byte[,] State = new byte[4, 4];
-        private byte[,] Key = new byte[4,4];
-        private byte[,] KeySchedule = new byte[44,4];
+        private byte[,] State;
+        private byte[,] Key;
+        private byte[,] KeySchedule;
 
-        private int rCount { get; set; } = 0;
-        public int round { get; set; } = 0;
-        public int Nr { get; set; } = 10;
-        public int Nb { get; set; } = 4;
-        public int Nk { get; set; } = 4;
+        private int rCount { get; set; }
+        public int round { get; set; }
+        public int Nr { get; set; }
+        public int Nb { get; set; }
+        public int Nk { get; set; }
         public byte[,] keySchedule { get { return KeySchedule; } }
+        public byte[,] key
+        {
+            get { return Key; }
+            set { Key = value; }
+        }
+        public byte[,] state
+        {
+            get { return State; }
+            set { State = value; }
+        }
+
+
+        public AES(Constants.EncryptionMode mode)
+        {
+            aesSetup(mode);
+        }
 
         public byte[,] Encrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode mode)
         {
@@ -71,18 +87,6 @@ namespace AESEncryption
         }
 
         #region helpers for test
-        public byte[,] key 
-        {
-            get { return Key; }
-            set { Key = value; } 
-        }
-
-        public byte[,] state 
-        {
-            get { return State; }
-            set { State = value; }
-        }
-
         public byte[,] Encrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode mode, int rounds)
         {
             aesSetup(mode);
@@ -162,7 +166,7 @@ namespace AESEncryption
         {
             for (int index = 0; index < (Nb * (Nr + 1)); index++)
             {
-                if (index < 4)
+                if (index < Nk)
                 {
                     var tmp = BitConverter.GetBytes(getKey(index));
                     KeySchedule[index, 0] = tmp[3];
@@ -173,7 +177,7 @@ namespace AESEncryption
                 else
                 {
                     byte[] temp = new byte[4];
-                    temp[0] = keySchedule[index-1, 0];
+                    temp[0] = keySchedule[index - 1, 0];
                     temp[1] = keySchedule[index - 1, 1];
                     temp[2] = keySchedule[index - 1, 2];
                     temp[3] = keySchedule[index - 1, 3];
@@ -244,7 +248,7 @@ namespace AESEncryption
 
         public void subBytes()
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < Nb; i++)
             {
                 for (int d = 0; d < 4; d++)
                 {
@@ -255,9 +259,9 @@ namespace AESEncryption
 
         public void mixColumns()
         {
-            var tmpState = new byte[4, 4];
+            var tmpState = new byte[Nb, 4];
 
-            for (int row = 0; row < 4; row++)
+            for (int row = 0; row < Nb; row++)
             {
                 tmpState[row, 0] = BitConverter.GetBytes(xTime(State[row, 0]) ^ (xTime(State[row, 1]) ^ State[row, 1]) ^ State[row, 2] ^ State[row, 3])[0];
                 tmpState[row, 1] = BitConverter.GetBytes(xTime(State[row, 1]) ^ (xTime(State[row, 2]) ^ State[row, 2]) ^ State[row, 3] ^ State[row, 0])[0];
@@ -272,7 +276,7 @@ namespace AESEncryption
         {
             for (int row = 1; row < 4; row++)
             {
-                shiftRow( row);
+                shiftRow(row);
             }
         }
 
@@ -310,6 +314,9 @@ namespace AESEncryption
                 default:
                     break;
             }
+            State = new byte[Nb, 4];
+            Key = new byte[Nb, 4];
+            KeySchedule = new byte[(Nb*(Nr+1)), 4];
         }
 
         private uint getKey(int index)

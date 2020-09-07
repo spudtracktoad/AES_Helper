@@ -12,7 +12,7 @@ namespace AES_Tests
         [TestInitialize]
         public void initTest()
         {
-            test = new AES();
+            test = new AES(Constants.EncryptionMode.AES128);
         }
 
         [TestCleanup]
@@ -36,8 +36,6 @@ namespace AES_Tests
         [TestMethod]
         public void xTimeTestOne()
         {
-            AES test = new AES();
-
             Assert.IsTrue(test.xTime(0x57) == 0xae);
         }
 

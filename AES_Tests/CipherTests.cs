@@ -19,7 +19,7 @@ namespace AES_Tests
         [TestInitialize]
         public void setup()
         {
-            aesTest = new AES();
+            aesTest = new AES(Constants.EncryptionMode.AES128);
         }
 
         [TestMethod]
@@ -128,7 +128,6 @@ namespace AES_Tests
             aesTest.key = testKey;
 
             aesTest.expandKey();
-            aesTest.rCount = 0;
 
             aesTest.addRoundKey();
 
