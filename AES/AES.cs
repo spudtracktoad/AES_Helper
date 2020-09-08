@@ -119,8 +119,8 @@ namespace AESEncryption
             printArray(state, "iinput");
 
             expandKey();
-            printKeySchedule();
-            addRoundKey();
+            printInvKeySchedule();
+            invAddRoundKey();
             round++;
 
             //1 - Nr - 1 rounds
@@ -131,10 +131,10 @@ namespace AESEncryption
                 printArray(state, "is_row");
                 invSubBytes();
                 printArray(state, "is_box");
-                addRoundKey();
+                printInvKeySchedule();
+                invAddRoundKey();
+                printArray(state, "ik_add");
                 invMixColumns();
-                printArray(state, "im_col");
-                printKeySchedule();
             }
 
             //Last round
@@ -143,8 +143,8 @@ namespace AESEncryption
             printArray(state, "is_row");
             invSubBytes();
             printArray(state, "is_box");
-            addRoundKey();
-            printKeySchedule();
+            invAddRoundKey();
+            printInvKeySchedule();
             printArray(state, "output");
 
             return state;
@@ -381,6 +381,15 @@ namespace AESEncryption
             }
         }
 
+        public void invAddRoundKey()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                invAddRoundKeyBytes(i);
+                rCount++;
+            }
+        }
+
         public void invSubBytes()
         {
             for (int i = 0; i < Nb; i++)
@@ -510,6 +519,20 @@ namespace AESEncryption
             }
         }
 
+        private void invAddRoundKeyBytes(int index)
+        {
+            byte[] tmpKey = new byte[4];
+            tmpKey[0] = KeySchedule[(((KeySchedule.Length / 4) + index) - (4 + (round * 4))), 0];
+            tmpKey[1] = KeySchedule[(((KeySchedule.Length / 4) + index) - (4 + (round * 4))), 1];
+            tmpKey[2] = KeySchedule[(((KeySchedule.Length / 4) + index) - (4 + (round * 4))), 2];
+            tmpKey[3] = KeySchedule[(((KeySchedule.Length / 4) + index) - (4 + (round * 4))), 3];
+
+            for (int i = 0; i < 4; i++)
+            {
+                state[index, i] = BitConverter.GetBytes(state[index, i] ^ tmpKey[i])[0];
+            }
+        }
+
         private void printArray(byte[,] data, string state)
         {
             Console.Write("round[{0}].{1}         ", round, state);
@@ -531,6 +554,19 @@ namespace AESEncryption
                 for (int d = 0; d < 4; d++)
                 {
                     Console.Write("{0}", KeySchedule[i, d].ToString("X2"));
+                }
+            }
+            Console.WriteLine();
+        }
+
+        private void printInvKeySchedule()
+        {
+            Console.Write("round[{0}].{1}         ", round, "ik_sch");
+            for (int i = 0; i < 4; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    Console.Write("{0}", KeySchedule[(((KeySchedule.Length / 4) + i) - (4 + (round * 4))), d].ToString("X2"));
                 }
             }
             Console.WriteLine();
