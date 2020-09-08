@@ -100,10 +100,10 @@ namespace AESEncryption
             return state;
         }
 
-        public byte[,] decrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode aesMode)
+        public byte[,] Decrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode aesMode)
         {
             Console.WriteLine();
-            Console.WriteLine("CIPHER (DECRYPT):");
+            Console.WriteLine("INVERSE CIPHER (DECRYPT):");
             mode = aesMode;
 
             for (int i = 0; i < Nk; i++)
@@ -116,7 +116,7 @@ namespace AESEncryption
                 }
             }
 
-            printArray(state, "input");
+            printArray(state, "iinput");
 
             expandKey();
             printKeySchedule();
@@ -126,26 +126,54 @@ namespace AESEncryption
             //1 - Nr - 1 rounds
             for (; round < Nr; round++)
             {
-                printArray(state, "Start");
-                invSubBytes();
-                printArray(state, "s_box");
+                printArray(state, "iStart");
                 invShiftRows();
-                printArray(state, "s_row");
-                invMixColumns();
-                printArray(state, "m_col");
+                printArray(state, "is_row");
+                invSubBytes();
+                printArray(state, "is_box");
                 addRoundKey();
+                invMixColumns();
+                printArray(state, "im_col");
                 printKeySchedule();
             }
 
             //Last round
-            printArray(state, "Start");
-            invSubBytes();
-            printArray(state, "s_box");
+            printArray(state, "iStart");
             invShiftRows();
-            printArray(state, "s_row");
+            printArray(state, "is_row");
+            invSubBytes();
+            printArray(state, "is_box");
             addRoundKey();
             printKeySchedule();
             printArray(state, "output");
+
+            return state;
+        }
+
+        public object Decrypt(byte[] input, byte[] cipher_Key, Constants.EncryptionMode aesMode, int rounds)
+        {
+            aesSetup(mode);
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    state[i, d] = input[4 * i + d];
+                    Key[i, d] = cipher_Key[4 * i + d];
+                }
+            }
+
+            expandKey();
+            addRoundKey();
+            rCount = 4;
+
+            for (int round = 0; round < rounds - 1; round++)
+            {
+                invSubBytes();
+                invShiftRows();
+                invMixColumns();
+                addRoundKey();
+            }
 
             return state;
         }
