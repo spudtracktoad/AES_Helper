@@ -138,15 +138,15 @@ namespace AES_Tests
         public void invShiftRowTest()
         {
 
-            TestState = new byte[,] {{ 0xd4, 0x27, 0x11, 0xae },
-                                     { 0xe0, 0xbf, 0x98, 0xf1 },
-                                     { 0xb8, 0xb4, 0x5d, 0xe5 },
-                                     { 0x1e, 0x41, 0x52, 0x30 } };
+            TestState = new byte[,] {{ 0xd4, 0xbf, 0x5d, 0x30},
+                                     { 0xe0, 0xb4, 0x52, 0xae},
+                                     { 0xb8, 0x41, 0x11, 0xf1},
+                                     { 0x1e, 0x27, 0x98, 0xe5}};
 
-            TestStateResult = new byte[,] {{ 0xd4, 0x41, 0x5d, 0xf1},
-                                           { 0xe0, 0x27, 0x52, 0xe5},
-                                           { 0xb8, 0xbf, 0x11, 0x30},
-                                           { 0x1e, 0xb4, 0x98, 0xae}};
+            TestStateResult = new byte[,] {{ 0xd4, 0x27, 0x11, 0xae },
+                                            { 0xe0, 0xbf, 0x98, 0xf1 },
+                                            { 0xb8, 0xb4, 0x5d, 0xe5 },
+                                            { 0x1e, 0x41, 0x52, 0x30 } };
             aesTest.state = TestState;
 
             aesTest.invShiftRows();

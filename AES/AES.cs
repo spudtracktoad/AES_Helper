@@ -461,9 +461,9 @@ namespace AESEncryption
             for (int index = 0; index < shiftNumber; index++)
             {
                 tmp = state[3, shiftNumber];
-                state[1, shiftNumber] = state[0, shiftNumber];
-                state[2, shiftNumber] = state[1, shiftNumber];
                 state[3, shiftNumber] = state[2, shiftNumber];
+                state[2, shiftNumber] = state[1, shiftNumber];
+                state[1, shiftNumber] = state[0, shiftNumber];
                 state[0, shiftNumber] = tmp;
             }
         }
