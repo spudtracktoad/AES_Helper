@@ -51,6 +51,33 @@ namespace AES_Tests
         }
 
         [TestMethod]
+        public void invMixColumnsTest()
+        {
+            TestState = new byte[,] {{ 0x04, 0x66, 0x81, 0xe5},
+                                     { 0xe0, 0xcb, 0x19, 0x9a},
+                                     { 0x48, 0xf8, 0xd3, 0x7a},
+                                     { 0x28, 0x06, 0x26, 0x4c}};
+
+            TestStateResult = new byte[,] {{ 0xd4, 0xbf, 0x5d, 0x30},
+                                           { 0xe0, 0xb4, 0x52, 0xae},
+                                           { 0xb8, 0x41, 0x11, 0xf1},
+                                           { 0x1e, 0x27, 0x98, 0xe5} };
+
+            aesTest.state = TestState;
+
+            aesTest.invMixColumns();
+
+            var result = aesTest.state;
+
+            for (int i = 0; i < 4; i++)
+            {
+                for (int d = 0; d < 4; d++)
+                {
+                    Assert.IsTrue(result[i, d] == TestStateResult[i, d]);
+                }
+            }
+        }
+        [TestMethod]
         public void subWordTest()
         {
 
@@ -283,6 +310,12 @@ namespace AES_Tests
                     Assert.IsTrue(cipher[i, d] == RoundOneState[i, d]);
                 }
             }
+        }
+
+        [TestMethod]
+        public void decipherTestRound1()
+        {
+
         }
     }
 }

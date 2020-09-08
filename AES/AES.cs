@@ -370,10 +370,10 @@ namespace AESEncryption
 
             for (int row = 0; row < Nb; row++)
             {
-                tmpState[row, 0] = BitConverter.GetBytes(xTime(State[row, 0]) ^ (xTime(State[row, 1]) ^ State[row, 1]) ^ State[row, 2] ^ State[row, 3])[0];
-                tmpState[row, 1] = BitConverter.GetBytes(xTime(State[row, 1]) ^ (xTime(State[row, 2]) ^ State[row, 2]) ^ State[row, 3] ^ State[row, 0])[0];
-                tmpState[row, 2] = BitConverter.GetBytes(xTime(State[row, 2]) ^ (xTime(State[row, 3]) ^ State[row, 3]) ^ State[row, 0] ^ State[row, 1])[0];
-                tmpState[row, 3] = BitConverter.GetBytes(xTime(State[row, 3]) ^ (xTime(State[row, 0]) ^ State[row, 0]) ^ State[row, 1] ^ State[row, 2])[0];
+                tmpState[row, 0] = BitConverter.GetBytes(ffMultiply(0x0e, state[row, 0]) ^ ffMultiply(0x0b, state[row, 1]) ^ ffMultiply(0x0d, state[row, 2]) ^ ffMultiply(0x09, state[row, 3]))[0];
+                tmpState[row, 1] = BitConverter.GetBytes(ffMultiply(0x09, state[row, 0]) ^ ffMultiply(0x0e, state[row, 1]) ^ ffMultiply(0x0b, state[row, 2]) ^ ffMultiply(0x0d, state[row, 3]))[0];
+                tmpState[row, 2] = BitConverter.GetBytes(ffMultiply(0x0d, state[row, 0]) ^ ffMultiply(0x09, state[row, 1]) ^ ffMultiply(0x0e, state[row, 2]) ^ ffMultiply(0x0b, state[row, 3]))[0];
+                tmpState[row, 3] = BitConverter.GetBytes(ffMultiply(0x0b, state[row, 0]) ^ ffMultiply(0x0d, state[row, 1]) ^ ffMultiply(0x09, state[row, 2]) ^ ffMultiply(0x0e, state[row, 3]))[0];
             }
 
             State = tmpState;
